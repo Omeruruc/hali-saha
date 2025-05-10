@@ -13,10 +13,10 @@ interface Field {
   id: number;
   name: string;
   location: string;
-  description: string;
+  description?: string;
+  image_url?: string;
   city_id: number;
-  city_name: string;
-  image_url: string;
+  cities: { name: string } | { name: string }[];
 }
 
 interface TimeSlot {
@@ -47,34 +47,21 @@ const FieldDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchField = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('fields')
           .select(`
-            id,
-            name,
-            location,
-            description,
-            image_url,
-            city_id,
+            *,
             cities(name)
           `)
           .eq('id', id)
           .single();
-        
         if (error) throw error;
-        
-        setField({
-          id: data.id,
-          name: data.name,
-          location: data.location,
-          description: data.description,
-          city_id: data.city_id,
-          city_name: Array.isArray(data.cities) ? (data.cities as any[])[0]?.name : (data.cities as any)?.name || '',
-          image_url: data.image_url || 'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'
-        });
+        setField(data);
       } catch (error) {
-        console.error('Error fetching field details:', error);
+        console.error('Halısaha detayları yüklenirken hata oluştu:', error);
+        setField(null);
       } finally {
         setLoading(false);
       }
@@ -211,7 +198,7 @@ const FieldDetail: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{field.name}</h1>
         <div className="flex items-center text-gray-600">
           <MapPin className="h-5 w-5 mr-1" />
-          <span>{field.city_name}, {field.location}</span>
+          <span>{field.location}, {Array.isArray(field.cities) ? field.cities[0]?.name : field.cities?.name}</span>
         </div>
       </div>
       
