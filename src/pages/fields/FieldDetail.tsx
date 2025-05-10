@@ -323,7 +323,7 @@ const FieldDetail: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Saat Seçin
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     ...allSlots.filter(slot => !slot.is_reserved),
                     ...allSlots.filter(slot => slot.is_reserved)
@@ -332,25 +332,25 @@ const FieldDetail: React.FC = () => {
                       key={slot.start_time + idx}
                       disabled={slot.is_reserved}
                       onClick={() => setSelectedTimeSlot(slot)}
-                      className={`p-3 rounded-lg border text-center transition-all duration-150
+                      className={`p-4 rounded-xl border-2 text-center transition-all duration-150 shadow-sm hover:shadow-md
                         ${selectedTimeSlot?.start_time === slot.start_time ? 'bg-emerald-600 text-white border-emerald-600' :
                           slot.is_reserved ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' :
                           'border-gray-300 hover:border-emerald-500'}
                       `}
                     >
-                      <div className="text-sm font-medium flex flex-col items-center gap-1">
-                        <span>{slot.start_time} - {slot.end_time}</span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold mt-1 ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700'}`}>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 16v-4" /></svg>
+                      <div className="text-base font-medium flex flex-col items-center gap-2">
+                        <span className="text-lg font-bold">{slot.start_time} - {slot.end_time}</span>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 16v-4" /></svg>
                           {slot.price} ₺
                         </span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold mt-1 ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-yellow-100 text-yellow-700'}`}>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-yellow-100 text-yellow-700'}`}>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
                           Kapora: {slot.deposit_amount} ₺
                         </span>
                       </div>
                       {slot.is_reserved && (
-                        <div className="text-xs mt-1">Dolu</div>
+                        <div className="text-sm mt-2 font-medium">Dolu</div>
                       )}
                     </button>
                   ))}

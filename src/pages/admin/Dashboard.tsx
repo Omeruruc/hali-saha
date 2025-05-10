@@ -184,12 +184,13 @@ const AdminDashboard: React.FC = () => {
                         <MapPin className="h-4 w-4" />
                         <span>{field.location}, {Array.isArray(field.cities) ? field.cities[0]?.name : field.cities?.name}</span>
                       </div>
-                      <div className="mt-4 flex space-x-2">
+                      <div className="mt-4 grid grid-cols-2 gap-2 w-full">
                         <Button
                           variant="outline"
                           leftIcon={<Edit className="h-4 w-4" />}
                           as={Link}
                           to={`/admin/fields/${field.id}/edit`}
+                          className="px-2 py-2 min-w-0 rounded-md text-sm font-medium flex items-center gap-1 shadow border border-gray-200 hover:border-emerald-400 transition-all truncate"
                         >
                           Düzenle
                         </Button>
@@ -198,9 +199,10 @@ const AdminDashboard: React.FC = () => {
                           leftIcon={<CalendarDays className="h-4 w-4" />}
                           as={Link}
                           to={`/admin/fields/${field.id}/availability`}
+                          className="px-2 py-2 min-w-0 rounded-md text-sm font-medium flex items-center gap-1 shadow border border-gray-200 hover:border-emerald-400 transition-all truncate"
                         >
-                          Müsaitlik Ekle
-                          </Button>
+                          Müsaitlik
+                        </Button>
                       </div>
                     </div>
                   ))}
