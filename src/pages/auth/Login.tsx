@@ -128,8 +128,14 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-emerald-700 via-blue-900 to-emerald-900">
+      <img
+        src="https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg"
+        alt="Futbol Sahası"
+        className="absolute inset-0 w-full h-full object-cover opacity-60 z-0"
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 to-blue-900/80 z-10" />
+      <div className="relative z-20 w-full max-w-md mx-auto p-8 bg-white/90 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="text-center">
           <div className="flex justify-center">
             <Soccer className="h-12 w-12 text-emerald-600" />
