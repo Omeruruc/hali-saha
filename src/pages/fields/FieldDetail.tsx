@@ -38,6 +38,7 @@ const FieldDetail: React.FC = () => {
   const [allSlots, setAllSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [reservationLoading, setReservationLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   
   // Generate next 7 dates for date picker
   const dates = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
@@ -143,8 +144,11 @@ const FieldDetail: React.FC = () => {
       
       if (availabilityError) throw availabilityError;
       
-      // Redirect to payment page
-      navigate(`/reservations/${reservationData[0].id}/payment`);
+      // Başarı mesajı göster
+      setShowSuccess(true);
+      setTimeout(() => {
+        navigate(`/reservations/${reservationData[0].id}/payment`);
+      }, 2000);
     } catch (error) {
       console.error('Error creating reservation:', error);
       toast.error('Rezervasyon oluşturulurken bir hata oluştu.');
@@ -322,12 +326,11 @@ const FieldDetail: React.FC = () => {
                   {allSlots.map((slot, idx) => (
                     <button
                       key={slot.start_time + idx}
-                      disabled={slot.is_reserved || slot.id === 0}
-                      onClick={() => slot.id !== 0 && setSelectedTimeSlot(slot)}
+                      disabled={slot.is_reserved}
+                      onClick={() => setSelectedTimeSlot(slot)}
                       className={`p-3 rounded-lg border text-center transition-all duration-150
-                        ${selectedTimeSlot?.start_time === slot.start_time && slot.id !== 0 ? 'bg-emerald-600 text-white border-emerald-600' :
+                        ${selectedTimeSlot?.start_time === slot.start_time ? 'bg-emerald-600 text-white border-emerald-600' :
                           slot.is_reserved ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' :
-                          slot.id === 0 ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' :
                           'border-gray-300 hover:border-emerald-500'}
                       `}
                     >
@@ -336,9 +339,6 @@ const FieldDetail: React.FC = () => {
                       </div>
                       {slot.is_reserved && (
                         <div className="text-xs mt-1">Dolu</div>
-                      )}
-                      {slot.id === 0 && (
-                        <div className="text-xs mt-1">Boş</div>
                       )}
                     </button>
                   ))}
@@ -392,6 +392,18 @@ const FieldDetail: React.FC = () => {
           </Card>
         </div>
       </div>
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-gradient-to-br from-emerald-400 to-blue-400 rounded-2xl shadow-2xl p-10 text-center animate-fade-in">
+            <h2 className="text-2xl font-bold text-white mb-2">Tebrikler!</h2>
+            <p className="text-white text-lg mb-4">Rezervasyonunuz başarıyla oluşturuldu.</p>
+            <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center bg-white rounded-full shadow-lg">
+              <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-white text-sm">Ödeme sayfasına yönlendiriliyorsunuz...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

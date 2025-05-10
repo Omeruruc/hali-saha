@@ -118,33 +118,39 @@ const FieldAvailability: React.FC = () => {
               ))}
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {HOURS.map(hour => (
-                <label key={hour} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 shadow-sm">
-                  <input
-                    type="checkbox"
-                    checked={!editSlots[hour]}
-                    onChange={() => handleSlotToggle(hour)}
-                    className="accent-emerald-500"
-                  />
-                  <span className={editSlots[hour] ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
-                    {hour} - {editSlots[hour] ? 'Dolu' : 'Boş'}
-                  </span>
-                  <input
-                    type="number"
-                    placeholder="Fiyat"
-                    value={slotPrices[hour] || ''}
-                    onChange={(e) => setSlotPrices({ ...slotPrices, [hour]: Number(e.target.value) })}
-                    className="w-20 px-2 py-1 border rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Kapora"
-                    value={slotDeposits[hour] || ''}
-                    onChange={(e) => setSlotDeposits({ ...slotDeposits, [hour]: Number(e.target.value) })}
-                    className="w-20 px-2 py-1 border rounded"
-                  />
-                </label>
-              ))}
+              {HOURS.map(hour => {
+                const isSlotReserved = availabilities.find((a: any) => a.start_time === hour)?.is_reserved;
+                return (
+                  <label key={hour} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 shadow-sm">
+                    <input
+                      type="checkbox"
+                      checked={!editSlots[hour]}
+                      onChange={() => !isSlotReserved && handleSlotToggle(hour)}
+                      className="accent-emerald-500"
+                      disabled={isSlotReserved}
+                    />
+                    <span className={isSlotReserved ? 'text-red-500 font-semibold' : editSlots[hour] ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
+                      {hour} - {isSlotReserved ? 'Dolu' : (editSlots[hour] ? 'Dolu' : 'Boş')}
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="Fiyat"
+                      value={slotPrices[hour] || ''}
+                      onChange={(e) => setSlotPrices({ ...slotPrices, [hour]: Number(e.target.value) })}
+                      className="w-20 px-2 py-1 border rounded"
+                      disabled={isSlotReserved}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Kapora"
+                      value={slotDeposits[hour] || ''}
+                      onChange={(e) => setSlotDeposits({ ...slotDeposits, [hour]: Number(e.target.value) })}
+                      className="w-20 px-2 py-1 border rounded"
+                      disabled={isSlotReserved}
+                    />
+                  </label>
+                );
+              })}
             </div>
             <Button
               className="mt-6"

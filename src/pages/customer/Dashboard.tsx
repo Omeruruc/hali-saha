@@ -147,18 +147,27 @@ const CustomerDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <label className="block text-base font-semibold text-gray-700 mb-2">Şehir Seçin</label>
-                  <select
-                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-lg"
-                    value={selectedCity || ''}
-                    onChange={handleCityChange}
-                    disabled={loading.cities}
-                  >
-                    <option value="">Şehir seçiniz</option>
-                    {cities.map(city => (
-                      <option key={city.id} value={city.id}>{city.name}</option>
-                    ))}
-                  </select>
+                  <label className="block text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 12.414C12.633 11.633 11.367 11.633 10.586 12.414L6.343 16.657M8 8V6a4 4 0 118 0v2" /></svg>
+                    Şehir Seçin
+                  </label>
+                  <div className="relative">
+                    <select
+                      className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 text-lg font-semibold text-gray-700 shadow-md transition-all duration-200 appearance-none"
+                      value={selectedCity || ''}
+                      onChange={handleCityChange}
+                      disabled={loading.cities}
+                      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' fill=\'none\' stroke=\'%2334d399\' stroke-width=\'2\' viewBox=\'0 0 24 24\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.5rem' }}
+                    >
+                      <option value="" disabled>Şehir seçiniz</option>
+                      {cities.map(city => (
+                        <option key={city.id} value={city.id}>{city.name}</option>
+                      ))}
+                    </select>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                      <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    </span>
+                  </div>
                 </div>
                 {loading.fields ? (
                   <div className="flex justify-center items-center py-8">
