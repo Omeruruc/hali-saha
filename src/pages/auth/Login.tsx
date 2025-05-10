@@ -206,23 +206,6 @@ const Login: React.FC = () => {
                 {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
               </Button>
             </form>
-            
-            <div className="mt-4">
-              <Button 
-                type="button"
-                variant="outline"
-                fullWidth
-                onClick={testSupabaseConnection}
-              >
-                Bağlantıyı Test Et
-              </Button>
-              
-              {testResult && (
-                <div className="mt-3 p-3 bg-gray-50 text-sm rounded-md font-mono whitespace-pre-wrap">
-                  {testResult}
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
