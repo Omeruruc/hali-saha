@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import { supabase } from '../../lib/supabase';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
-import { Percent as Soccer, Save, X, Plus, Trash2 } from 'lucide-react';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+import { Percent as Soccer } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface City {
@@ -14,143 +13,63 @@ interface City {
   name: string;
 }
 
-interface TimeSlot {
-  id: string;
-  day: string;
-  start_time: string;
-  end_time: string;
-  price: number;
-  deposit_amount: number;
-}
-
 const AddField: React.FC = () => {
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [cityId, setCityId] = useState<number | null>(null);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    cityId: '',
-    location: '',
-    description: '',
-    imageUrl: 'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'
-  });
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
-    {
-      id: '1',
-      day: '1', // Monday
-      start_time: '18:00',
-      end_time: '19:00',
-      price: 400,
-      deposit_amount: 100
-    }
-  ]);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const days = [
-    { value: '1', label: 'Pazartesi' },
-    { value: '2', label: 'Salı' },
-    { value: '3', label: 'Çarşamba' },
-    { value: '4', label: 'Perşembe' },
-    { value: '5', label: 'Cuma' },
-    { value: '6', label: 'Cumartesi' },
-    { value: '0', label: 'Pazar' }
-  ];
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    // Redirect if not admin
+    // Kullanıcı admin değilse yönlendir
     if (userRole !== 'admin' && userRole !== null) {
       navigate('/');
       toast.error('Bu sayfaya erişim izniniz yok.');
+      return;
     }
     
+    // Şehirleri yükle
     const fetchCities = async () => {
+      setLoadingCities(true);
       try {
-        const { data, error } = await supabase.from('cities').select('*');
+        const { data, error } = await supabase
+          .from('cities')
+          .select('*')
+          .order('name');
+        
         if (error) throw error;
         setCities(data || []);
       } catch (error) {
-        console.error('Error fetching cities:', error);
+        console.error('Şehirler yüklenirken hata oluştu:', error);
+        toast.error('Şehirler yüklenirken bir sorun oluştu.');
+      } finally {
+        setLoadingCities(false);
       }
     };
-
+    
     fetchCities();
   }, [navigate, userRole]);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
     
-    // Clear error when field is updated
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleTimeSlotChange = (index: number, field: keyof TimeSlot, value: string | number) => {
-    const updatedTimeSlots = [...timeSlots];
-    updatedTimeSlots[index] = {
-      ...updatedTimeSlots[index],
-      [field]: value
-    };
-    setTimeSlots(updatedTimeSlots);
-  };
-
-  const addTimeSlot = () => {
-    const newId = (parseInt(timeSlots[timeSlots.length - 1]?.id || '0') + 1).toString();
-    setTimeSlots([
-      ...timeSlots,
-      {
-        id: newId,
-        day: '1',
-        start_time: '18:00',
-        end_time: '19:00',
-        price: 400,
-        deposit_amount: 100
-      }
-    ]);
-  };
-
-  const removeTimeSlot = (index: number) => {
-    setTimeSlots(timeSlots.filter((_, i) => i !== index));
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!form.name.trim()) {
+    if (!name.trim()) {
       newErrors.name = 'Halısaha adı gereklidir';
     }
     
-    if (!form.cityId) {
+    if (!cityId) {
       newErrors.cityId = 'Şehir seçimi gereklidir';
     }
     
-    if (!form.location.trim()) {
-      newErrors.location = 'Lokasyon bilgisi gereklidir';
+    if (!location.trim()) {
+      newErrors.location = 'Adres gereklidir';
     }
-    
-    if (!form.description.trim()) {
-      newErrors.description = 'Açıklama gereklidir';
-    }
-    
-    timeSlots.forEach((slot, index) => {
-      if (parseFloat(slot.end_time) <= parseFloat(slot.start_time)) {
-        newErrors[`timeSlot-${index}-time`] = 'Bitiş saati, başlangıç saatinden sonra olmalıdır';
-      }
-      
-      if (slot.price <= 0) {
-        newErrors[`timeSlot-${index}-price`] = 'Geçerli bir fiyat giriniz';
-      }
-      
-      if (slot.deposit_amount <= 0 || slot.deposit_amount >= slot.price) {
-        newErrors[`timeSlot-${index}-deposit`] = 'Kapora, toplam fiyattan düşük olmalıdır';
-      }
-    });
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -159,314 +78,143 @@ const AddField: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      toast.error('Lütfen formdaki hataları düzeltin.');
-      return;
-    }
-    
+    if (!validate()) return;
     if (!user) {
-      toast.error('Giriş yapmalısınız.');
-      navigate('/login');
+      toast.error('Giriş yapmanız gerekiyor');
       return;
     }
     
     setLoading(true);
-    
     try {
-      // 1. Insert field
-      const { data: fieldData, error: fieldError } = await supabase
+      // Halısahayı ekle
+      const { data, error } = await supabase
         .from('fields')
         .insert({
-          owner_id: user.id,
-          city_id: parseInt(form.cityId),
-          name: form.name,
-          location: form.location,
-          description: form.description,
-          image_url: form.imageUrl
+          name,
+          location,
+          description: description || null,
+          image_url: imageUrl || null,
+          city_id: cityId,
+          owner_id: user.id
         })
         .select()
         .single();
       
-      if (fieldError) throw fieldError;
-      
-      // 2. Insert availabilities
-      const today = new Date();
-      const availabilityPromises = [];
-      
-      // Create availabilities for the next 30 days
-      for (let i = 0; i < 30; i++) {
-        const date = new Date();
-        date.setDate(today.getDate() + i);
-        const dayOfWeek = date.getDay().toString(); // 0 = Sunday, 1 = Monday, etc.
-        
-        // Filter time slots for this day of week
-        const slotsForDay = timeSlots.filter(slot => slot.day === dayOfWeek);
-        
-        for (const slot of slotsForDay) {
-          availabilityPromises.push(
-            supabase.from('availabilities').insert({
-              field_id: fieldData.id,
-              date: date.toISOString().split('T')[0], // YYYY-MM-DD
-              start_time: slot.start_time,
-              end_time: slot.end_time,
-              price: slot.price,
-              deposit_amount: slot.deposit_amount,
-              is_reserved: false
-            })
-          );
-        }
-      }
-      
-      await Promise.all(availabilityPromises);
+      if (error) throw error;
       
       toast.success('Halısaha başarıyla eklendi!');
       navigate('/admin/dashboard');
-    } catch (error) {
-      console.error('Error adding field:', error);
-      toast.error('Halısaha eklenirken bir hata oluştu.');
+    } catch (error: any) {
+      console.error('Halısaha eklenirken hata oluştu:', error);
+      toast.error('Halısaha eklenirken bir sorun oluştu.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <Soccer className="h-8 w-8 text-emerald-600 mr-2" />
-          Yeni Halısaha Ekle
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Halısahanızı ekleyerek müşterilerin rezervasyon yapmalarını sağlayın.
-        </p>
-      </div>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Field Information */}
-          <div className="lg:col-span-2">
-            <Card className="mb-8">
-              <CardHeader>
-                <h2 className="text-xl font-semibold text-gray-900">Halısaha Bilgileri</h2>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  label="Halısaha Adı"
-                  id="name"
-                  name="name"
-                  value={form.name}
-                  onChange={handleFormChange}
-                  placeholder="Örn: Yeşil Vadi Halısaha"
-                  error={errors.name}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Select
-                    label="Şehir"
-                    id="cityId"
-                    name="cityId"
-                    options={cities.map(city => ({ value: city.id, label: city.name }))}
-                    value={form.cityId}
-                    onChange={handleFormChange}
-                    error={errors.cityId}
-                  />
-                  
-                  <Input
-                    label="Lokasyon (Semt/İlçe)"
-                    id="location"
-                    name="location"
-                    value={form.location}
-                    onChange={handleFormChange}
-                    placeholder="Örn: Kadıköy"
-                    error={errors.location}
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Açıklama
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={form.description}
-                    onChange={handleFormChange}
-                    rows={4}
-                    className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Halısahanızın özellikleri, avantajları ve kuralları hakkında detaylı bilgi verin."
-                  />
-                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
-                </div>
-                
-                <Input
-                  label="Resim URL (opsiyonel)"
-                  id="imageUrl"
-                  name="imageUrl"
-                  value={form.imageUrl}
-                  onChange={handleFormChange}
-                  placeholder="Örn: https://example.com/image.jpg"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Time Slots */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Zaman Dilimleri ve Fiyatlandırma</h2>
-                  <Button 
-                    onClick={addTimeSlot} 
-                    variant="outline" 
-                    type="button"
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Yeni Ekle
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {timeSlots.map((slot, index) => (
-                    <div key={slot.id} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-medium text-gray-900">Zaman Dilimi #{index + 1}</h3>
-                        {timeSlots.length > 1 && (
-                          <button
-                            onClick={() => removeTimeSlot(index)}
-                            type="button"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <Select
-                          label="Gün"
-                          id={`day-${index}`}
-                          options={days}
-                          value={slot.day}
-                          onChange={(e) => handleTimeSlotChange(index, 'day', e.target.value)}
-                        />
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Saat Aralığı
-                          </label>
-                          <div className="flex items-center">
-                            <input
-                              type="time"
-                              value={slot.start_time}
-                              onChange={(e) => handleTimeSlotChange(index, 'start_time', e.target.value)}
-                              className="px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 border-gray-300"
-                            />
-                            <span className="mx-2">-</span>
-                            <input
-                              type="time"
-                              value={slot.end_time}
-                              onChange={(e) => handleTimeSlotChange(index, 'end_time', e.target.value)}
-                              className="px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 border-gray-300"
-                            />
-                          </div>
-                          {errors[`timeSlot-${index}-time`] && (
-                            <p className="mt-1 text-sm text-red-600">{errors[`timeSlot-${index}-time`]}</p>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          label="Toplam Fiyat (₺)"
-                          type="number"
-                          value={slot.price}
-                          onChange={(e) => handleTimeSlotChange(index, 'price', parseFloat(e.target.value))}
-                          error={errors[`timeSlot-${index}-price`]}
-                        />
-                        
-                        <Input
-                          label="Kapora Miktarı (₺)"
-                          type="number"
-                          value={slot.deposit_amount}
-                          onChange={(e) => handleTimeSlotChange(index, 'deposit_amount', parseFloat(e.target.value))}
-                          error={errors[`timeSlot-${index}-deposit`]}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
-                  <div className="flex">
-                    <Info className="h-5 w-5 text-amber-600 mr-2 flex-shrink-0" />
-                    <p className="text-sm text-amber-700">
-                      Belirlediğiniz zaman dilimlerine göre müsaitlik durumu otomatik olarak oluşturulacaktır. 
-                      Seçtiğiniz her gün için önümüzdeki 30 gün için bu zaman dilimlerinde rezervasyon alınabilecektir.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Summary */}
-          <div>
-            <Card className="sticky top-8">
-              <CardHeader>
-                <h2 className="text-xl font-semibold text-gray-900">Özet</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-gray-700">
-                    Halısahanızı sisteme ekleyerek, müşterilerinizin online rezervasyon yapmalarını ve kapora ile yerlerini ayırmalarını sağlayacaksınız.
-                  </p>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-2">Eklenen Zaman Dilimleri</h3>
-                    {timeSlots.map((slot, index) => (
-                      <div key={slot.id} className="text-sm mb-2 pb-2 border-b border-gray-200 last:border-0">
-                        <p>
-                          <span className="font-medium">{days.find(d => d.value === slot.day)?.label}: </span>
-                          {slot.start_time} - {slot.end_time}
-                        </p>
-                        <p className="text-gray-600">
-                          Fiyat: {slot.price} ₺ (Kapora: {slot.deposit_amount} ₺)
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="pt-4 border-t border-gray-200">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      fullWidth
-                      disabled={loading}
-                    >
-                      <Save className="h-5 w-5 mr-2" />
-                      {loading ? 'Kaydediliyor...' : 'Halısahayı Kaydet'}
-                    </Button>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      fullWidth
-                      className="mt-3"
-                      onClick={() => navigate('/admin/dashboard')}
-                    >
-                      <X className="h-5 w-5 mr-2" />
-                      İptal
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-8 text-center">
+          <Soccer className="h-12 w-12 text-emerald-600 mx-auto mb-2" />
+          <h1 className="text-3xl font-bold text-gray-800">Yeni Halısaha Ekle</h1>
+          <p className="text-gray-600 mt-2">Lütfen halısaha bilgilerini giriniz</p>
         </div>
-      </form>
+        
+        <Card>
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-800">Halısaha Detayları</h2>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Input
+                id="name"
+                label="Halısaha Adı"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                error={errors.name}
+                placeholder="Örn: Yeşil Vadi Halısaha"
+                required
+              />
+              
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                  Şehir
+                </label>
+                <select
+                  id="city"
+                  value={cityId || ''}
+                  onChange={(e) => setCityId(Number(e.target.value) || null)}
+                  className={`mt-1 block w-full rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm border-gray-300 ${errors.cityId ? 'border-red-300' : ''}`}
+                  disabled={loadingCities}
+                  required
+                >
+                  <option value="">Şehir seçin</option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.cityId && (
+                  <p className="mt-1 text-sm text-red-600">{errors.cityId}</p>
+                )}
+              </div>
+              
+              <Input
+                id="location"
+                label="Adres"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                error={errors.location}
+                placeholder="Örn: Atatürk Mah. Spor Cad. No:42"
+                required
+              />
+              
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Açıklama
+                </label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  className="mt-1 block w-full rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm border-gray-300"
+                  placeholder="Halısaha hakkında kısa bir açıklama..."
+                />
+              </div>
+              
+              <Input
+                id="imageUrl"
+                label="Görsel URL (Opsiyonel)"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+              
+              <div className="flex gap-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate('/admin/dashboard')}
+                  fullWidth
+                >
+                  İptal
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={loading}
+                  fullWidth
+                >
+                  {loading ? 'Ekleniyor...' : 'Halısaha Ekle'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

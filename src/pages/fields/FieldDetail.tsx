@@ -35,12 +35,14 @@ const FieldDetail: React.FC = () => {
   const [field, setField] = useState<Field | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [allSlots, setAllSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [reservationLoading, setReservationLoading] = useState(false);
   
   // Generate next 7 dates for date picker
   const dates = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
+
+  const HOURS = Array.from({ length: 16 }, (_, i) => `${(8 + i).toString().padStart(2, '0')}:00`);
 
   useEffect(() => {
     const fetchField = async () => {
@@ -67,7 +69,7 @@ const FieldDetail: React.FC = () => {
           location: data.location,
           description: data.description,
           city_id: data.city_id,
-          city_name: data.cities?.name || '',
+          city_name: Array.isArray(data.cities) ? (data.cities as any[])[0]?.name : (data.cities as any)?.name || '',
           image_url: data.image_url || 'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'
         });
       } catch (error) {
@@ -83,24 +85,20 @@ const FieldDetail: React.FC = () => {
   useEffect(() => {
     const fetchTimeSlots = async () => {
       if (!id) return;
-      
       const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      
       try {
         const { data, error } = await supabase
           .from('availabilities')
           .select('*')
           .eq('field_id', id)
           .eq('date', formattedDate);
-        
         if (error) throw error;
-        
-        setTimeSlots(data || []);
+        // Sadece veritabanında olan slotları göster
+        setAllSlots(data || []);
       } catch (error) {
         console.error('Error fetching time slots:', error);
       }
     };
-
     fetchTimeSlots();
   }, [id, selectedDate]);
 
@@ -320,38 +318,31 @@ const FieldDetail: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Saat Seçin
                 </label>
-                {timeSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {timeSlots.map((slot) => (
-                      <button
-                        key={slot.id}
-                        disabled={slot.is_reserved}
-                        onClick={() => setSelectedTimeSlot(slot)}
-                        className={`p-3 rounded-lg border text-center ${
-                          selectedTimeSlot?.id === slot.id
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : slot.is_reserved
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'border-gray-300 hover:border-emerald-500'
-                        }`}
-                      >
-                        <div className="text-sm font-medium">
-                          {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
-                        </div>
-                        {slot.is_reserved && (
-                          <div className="text-xs mt-1">Dolu</div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg text-center">
-                    <Info className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">
-                      Bu tarih için müsait saat bulunmamaktadır.
-                    </p>
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-2">
+                  {allSlots.map((slot, idx) => (
+                    <button
+                      key={slot.start_time + idx}
+                      disabled={slot.is_reserved || slot.id === 0}
+                      onClick={() => slot.id !== 0 && setSelectedTimeSlot(slot)}
+                      className={`p-3 rounded-lg border text-center transition-all duration-150
+                        ${selectedTimeSlot?.start_time === slot.start_time && slot.id !== 0 ? 'bg-emerald-600 text-white border-emerald-600' :
+                          slot.is_reserved ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' :
+                          slot.id === 0 ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' :
+                          'border-gray-300 hover:border-emerald-500'}
+                      `}
+                    >
+                      <div className="text-sm font-medium">
+                        {slot.start_time} - {slot.end_time}
+                      </div>
+                      {slot.is_reserved && (
+                        <div className="text-xs mt-1">Dolu</div>
+                      )}
+                      {slot.id === 0 && (
+                        <div className="text-xs mt-1">Boş</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
               
               {/* Price info */}

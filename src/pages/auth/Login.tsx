@@ -5,6 +5,13 @@ import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { Percent as Soccer } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { supabase } from '../../lib/supabase';
+
+// E-posta adresini normalleştirme işlevi
+const normalizeEmail = (email: string): string => {
+  return email.toLowerCase().trim();
+};
 
 const Login: React.FC = () => {
   const { signIn } = useAuth();
@@ -13,6 +20,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,20 +51,79 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      // E-posta adresini küçük harfe dönüştürelim ve boşlukları temizleyelim
+      const normalizedEmail = normalizeEmail(email);
+      
+      console.log('Giriş denenecek e-posta:', normalizedEmail);
+      console.log('Girilen şifre uzunluğu:', password.length);
+      
+      const { error } = await signIn(normalizedEmail, password);
       
       if (error) {
-        throw error;
+        console.error('Login error:', error);
+        console.error('Login error message:', error.message);
+        console.error('Login error details:', error.details);
+        
+        // Tüm hataları genel bir hata mesajı ile göster
+        setErrors({
+          general: `Giriş başarısız. E-posta adresi veya şifre hatalı. (Hata: ${error.message || 'Bilinmeyen'})`
+        });
+        return;
       }
       
-      navigate('/');
+      // Giriş başarılı - AuthContext içindeki yönlendirme kullanılacak
+      console.log('Giriş başarılı, yönlendirme bekleniyor...');
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('Login error (catch):', error);
       setErrors({
-        general: 'Giriş başarısız. Lütfen e-posta adresinizi ve şifrenizi kontrol edin.'
+        general: 'Giriş başarısız. Lütfen daha sonra tekrar deneyin.'
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const testSupabaseConnection = async () => {
+    setTestResult('Test ediliyor...');
+    try {
+      // 1. Supabase bağlantısını test et
+      const { data, error } = await supabase.from('users').select('count').limit(1);
+      
+      if (error) {
+        setTestResult(`Supabase bağlantı hatası: ${error.message}`);
+        return;
+      }
+      
+      // 2. Mevcut oturumu kontrol et
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+      
+      // 3. Sonuçları göster
+      let result = 'Test Sonuçları:\n';
+      result += `- Supabase Bağlantısı: Başarılı\n`;
+      result += `- Oturum Durumu: ${session ? 'Aktif' : 'Oturum açılmamış'}\n`;
+      
+      if (session) {
+        result += `- Kullanıcı ID: ${session.user.id}\n`;
+        result += `- Kullanıcı Email: ${session.user.email}\n`;
+        
+        // Rolü kontrol et
+        const { data: userData, error: roleError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (roleError) {
+          result += `- Rol Kontrolü: Hata (${roleError.message})\n`;
+        } else {
+          result += `- Kullanıcı Rolü: ${userData.role}\n`;
+        }
+      }
+      
+      setTestResult(result);
+    } catch (error: any) {
+      setTestResult(`Test hatası: ${error.message}`);
     }
   };
 
@@ -134,11 +201,28 @@ const Login: React.FC = () => {
                 type="submit"
                 variant="primary"
                 fullWidth
-                disabled={loading}
+                loading={loading}
               >
                 {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
               </Button>
             </form>
+            
+            <div className="mt-4">
+              <Button 
+                type="button"
+                variant="outline"
+                fullWidth
+                onClick={testSupabaseConnection}
+              >
+                Bağlantıyı Test Et
+              </Button>
+              
+              {testResult && (
+                <div className="mt-3 p-3 bg-gray-50 text-sm rounded-md font-mono whitespace-pre-wrap">
+                  {testResult}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

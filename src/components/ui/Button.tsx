@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { forwardRef, ElementType, ComponentPropsWithRef } from 'react';
 
-interface ButtonProps {
+export interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
@@ -9,9 +9,13 @@ interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   className?: string;
+  leftIcon?: React.ReactNode;
+  as?: ElementType;
+  loading?: boolean;
+  [x: string]: any; // Diğer olası props'lar için 
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   children,
   onClick,
   type = 'button',
@@ -20,7 +24,11 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   fullWidth = false,
   className = '',
-}) => {
+  leftIcon,
+  as: Component = 'button',
+  loading = false,
+  ...rest
+}, ref) => {
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantClasses = {
@@ -38,20 +46,27 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
-  const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : 'hover:transform hover:scale-105 active:scale-100';
+  const disabledClass = disabled || loading ? 'opacity-50 cursor-not-allowed' : 'hover:transform hover:scale-105 active:scale-100';
 
-  const buttonClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${disabledClass} ${className}`;
+  const buttonClasses = `${baseClasses} ${variantClasses[variant as keyof typeof variantClasses]} ${sizeClasses[size as keyof typeof sizeClasses]} ${widthClass} ${disabledClass} ${className}`;
+
+  const buttonProps = {
+    ...rest,
+    type: Component === 'button' ? type : undefined,
+    className: buttonClasses,
+    onClick,
+    disabled: disabled || loading,
+    ref
+  };
 
   return (
-    <button
-      type={type}
-      className={buttonClasses}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
+    <Component {...buttonProps}>
+      {leftIcon && <span className="mr-2">{leftIcon}</span>}
+      {loading ? 'Yükleniyor...' : children}
+    </Component>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

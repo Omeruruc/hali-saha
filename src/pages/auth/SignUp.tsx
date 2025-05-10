@@ -6,6 +6,11 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { Percent as Soccer } from 'lucide-react';
 
+// E-posta adresini normalleştirme işlevi
+const normalizeEmail = (email: string): string => {
+  return email.toLowerCase().trim();
+};
+
 const SignUp: React.FC = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -63,17 +68,26 @@ const SignUp: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password, role);
+      // E-posta adresini küçük harfe çevirelim 
+      const normalizedEmail = normalizeEmail(email);
+      
+      const { error } = await signUp(normalizedEmail, password, role);
       
       if (error) {
-        throw error;
+        console.error('Signup error:', error);
+        if (error.message?.includes('email') || error.message?.includes('already registered')) {
+          setErrors({
+            email: 'Bu e-posta adresi zaten kullanılıyor.'
+          });
+        } else {
+          setErrors({
+            general: `Kayıt olma işlemi başarısız oldu: ${error.message}`
+          });
+        }
+        return;
       }
       
-      if (role === 'admin') {
-        navigate('/admin/fields/new');
-      } else {
-        navigate('/fields');
-      }
+      // Redirect will be handled by the AuthContext
     } catch (error: any) {
       console.error('Sign up error:', error);
       setErrors({
