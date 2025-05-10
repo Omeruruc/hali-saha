@@ -48,7 +48,7 @@ const AdminDashboard: React.FC = () => {
 
   // Halısaha sahibinin halısahalarını yükle
   useEffect(() => {
-    if (!user) return;
+      if (!user) return;
 
     const fetchFields = async () => {
       setLoading(prevState => ({ ...prevState, fields: true }));
@@ -92,8 +92,8 @@ const AdminDashboard: React.FC = () => {
               *,
               fields(*)
             )
-          `)
-          .in('availabilities.field_id', fieldIds)
+            `)
+            .in('availabilities.field_id', fieldIds)
           .order('reservation_time', { ascending: false });
           
         if (error) throw error;
@@ -106,8 +106,8 @@ const AdminDashboard: React.FC = () => {
           availability: item.availabilities,
           field: item.availabilities.fields
         })) || [];
-        
-        setReservations(formattedReservations);
+
+          setReservations(formattedReservations);
       } catch (error) {
         console.error('Rezervasyonlar yüklenirken hata oluştu:', error);
       } finally {
@@ -142,9 +142,9 @@ const AdminDashboard: React.FC = () => {
                   <div className="text-2xl font-bold text-gray-800">{totalReservations}</div>
                   <div className="text-gray-500 text-sm">Toplam Rezervasyon</div>
                 </div>
-              </div>
+      </div>
             </div>
-          </div>
+            </div>
           <div className="flex space-x-4">
             <Button
               as={Link}
@@ -156,7 +156,7 @@ const AdminDashboard: React.FC = () => {
               Yeni Halısaha Ekle
             </Button>
           </div>
-        </div>
+      </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Halısahalarım */}
           <Card className="shadow-xl border-0">
@@ -200,7 +200,7 @@ const AdminDashboard: React.FC = () => {
                           to={`/admin/fields/${field.id}/availability`}
                         >
                           Müsaitlik Ekle
-                        </Button>
+                          </Button>
                       </div>
                     </div>
                   ))}
@@ -230,7 +230,7 @@ const AdminDashboard: React.FC = () => {
               {loading.reservations ? (
                 <div className="flex justify-center items-center py-8">
                   <svg className="animate-spin h-8 w-8 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-                </div>
+                                </div>
               ) : reservations.length > 0 ? (
                 <div className="space-y-4">
                   {reservations.map(reservation => (
@@ -238,11 +238,11 @@ const AdminDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-1">
                         <h3 className="font-bold text-gray-900 text-lg">{reservation.field.name}</h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Onaylandı</span>
-                      </div>
+                                  </div>
                       <div className="flex items-center text-gray-500 text-sm gap-2">
                         <MapPin className="h-4 w-4" />
                         <span>{reservation.field.location}, {Array.isArray(reservation.field.cities) ? reservation.field.cities[0]?.name : reservation.field.cities?.name}</span>
-                      </div>
+                                </div>
                       <div className="flex items-center gap-2 mt-2">
                         <User className="h-4 w-4" />
                         <span>{reservation.customer.email}</span>
@@ -250,13 +250,13 @@ const AdminDashboard: React.FC = () => {
                         <span>{new Date(reservation.availability.date).toLocaleDateString('tr-TR')}</span>
                         <Clock className="h-4 w-4 ml-2" />
                         <span>{reservation.availability.start_time.slice(0, 5)} - {reservation.availability.end_time.slice(0, 5)}</span>
-                      </div>
+                              </div>
                       <div className="mt-2">
                         <span className="font-semibold text-emerald-700 text-lg">
                           {reservation.availability.price} ₺
                         </span>
-                      </div>
-                    </div>
+                              </div>
+                </div>
                   ))}
                 </div>
               ) : (

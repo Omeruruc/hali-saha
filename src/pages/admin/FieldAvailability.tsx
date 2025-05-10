@@ -97,47 +97,50 @@ const FieldAvailability: React.FC = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800">Müsaitlik Takvimi</h1>
-          <p className="text-gray-500">Her gün için saatleri dolu/boş olarak işaretleyin ve kaydedin.</p>
-        </div>
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-800">Tarih Seç</h2>
+            <h2 className="text-2xl font-bold text-emerald-700 flex items-center gap-2">
+              <svg className="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Müsaitlik Takvimi
+            </h2>
+            <p className="text-gray-500 text-base mt-2">Her gün için saatleri dolu/boş olarak işaretleyin ve kaydedin.</p>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-6 justify-center">
               {days.map(day => (
                 <button
                   key={getDateString(day)}
-                  className={`px-3 py-2 rounded-lg font-semibold border ${selectedDate === getDateString(day) ? 'bg-emerald-500 text-white' : 'bg-white text-gray-700'} transition`}
+                  className={`px-4 py-2 rounded-xl font-semibold border text-lg shadow transition-all duration-150 ${selectedDate === getDateString(day) ? 'bg-gradient-to-r from-emerald-500 to-blue-400 text-white border-emerald-500 scale-105' : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-400'}`}
                   onClick={() => setSelectedDate(getDateString(day))}
                 >
-                  {format(day, 'EEE dd MMM')}
+                  <span className="block font-bold">{format(day, 'EEE', { locale: undefined })}</span>
+                  <span className="block text-xl">{format(day, 'd')}</span>
+                  <span className="block text-sm">{format(day, 'MMM')}</span>
                 </button>
               ))}
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {HOURS.map(hour => {
                 const isSlotReserved = availabilities.find((a: any) => a.start_time === hour)?.is_reserved;
                 return (
-                  <label key={hour} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 shadow-sm">
-                    <input
-                      type="checkbox"
-                      checked={!editSlots[hour]}
-                      onChange={() => !isSlotReserved && handleSlotToggle(hour)}
-                      className="accent-emerald-500"
-                      disabled={isSlotReserved}
-                    />
-                    <span className={isSlotReserved ? 'text-red-500 font-semibold' : editSlots[hour] ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
-                      {hour} - {isSlotReserved ? 'Dolu' : (editSlots[hour] ? 'Dolu' : 'Boş')}
-                    </span>
+                  <div key={hour} className={`flex flex-col items-center p-4 rounded-2xl shadow-lg border-2 transition-all duration-150 ${isSlotReserved ? 'bg-gradient-to-r from-red-100 to-red-200 border-red-400' : editSlots[hour] ? 'bg-gradient-to-r from-red-100 to-red-200 border-red-400' : 'bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200'}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={!editSlots[hour]}
+                        onChange={() => !isSlotReserved && handleSlotToggle(hour)}
+                        className="accent-emerald-500 w-6 h-6 rounded-lg border-2 border-emerald-300 focus:ring-emerald-500 focus:border-emerald-500"
+                        disabled={isSlotReserved}
+                      />
+                      <span className={`text-lg font-bold ${isSlotReserved ? 'text-red-600' : editSlots[hour] ? 'text-red-600' : 'text-emerald-600'}`}>{hour}</span>
+                    </div>
+                    <span className={`mb-2 px-3 py-1 rounded-full text-sm font-semibold ${isSlotReserved ? 'bg-red-500 text-white' : editSlots[hour] ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>{isSlotReserved ? 'Dolu' : (editSlots[hour] ? 'Dolu' : 'Boş')}</span>
                     <input
                       type="number"
                       placeholder="Fiyat"
                       value={slotPrices[hour] || ''}
                       onChange={(e) => setSlotPrices({ ...slotPrices, [hour]: Number(e.target.value) })}
-                      className="w-20 px-2 py-1 border rounded"
+                      className="w-full px-3 py-2 rounded-lg border-2 border-emerald-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 text-base font-semibold text-gray-700 shadow-sm mb-2 transition-all duration-150"
                       disabled={isSlotReserved}
                     />
                     <input
@@ -145,15 +148,15 @@ const FieldAvailability: React.FC = () => {
                       placeholder="Kapora"
                       value={slotDeposits[hour] || ''}
                       onChange={(e) => setSlotDeposits({ ...slotDeposits, [hour]: Number(e.target.value) })}
-                      className="w-20 px-2 py-1 border rounded"
+                      className="w-full px-3 py-2 rounded-lg border-2 border-emerald-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 text-base font-semibold text-gray-700 shadow-sm transition-all duration-150"
                       disabled={isSlotReserved}
                     />
-                  </label>
+                  </div>
                 );
               })}
             </div>
             <Button
-              className="mt-6"
+              className="mt-8 text-lg py-4 rounded-xl shadow-lg"
               variant="primary"
               loading={savingSlots}
               onClick={handleSaveSlots}

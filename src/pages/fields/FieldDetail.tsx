@@ -94,7 +94,8 @@ const FieldDetail: React.FC = () => {
           .eq('field_id', id)
           .eq('date', formattedDate);
         if (error) throw error;
-        // Sadece veritabanında olan slotları göster
+        // Admin panelindeki müsaitlik takviminden gelen verileri müşteri panelindeki müsaitlik takvimine aktar
+        // Sayfa yenilendiğinde verilerin korunması için doğrudan setAllSlots ile güncelle
         setAllSlots(data || []);
       } catch (error) {
         console.error('Error fetching time slots:', error);
@@ -323,7 +324,10 @@ const FieldDetail: React.FC = () => {
                   Saat Seçin
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {allSlots.map((slot, idx) => (
+                  {[
+                    ...allSlots.filter(slot => !slot.is_reserved),
+                    ...allSlots.filter(slot => slot.is_reserved)
+                  ].map((slot, idx) => (
                     <button
                       key={slot.start_time + idx}
                       disabled={slot.is_reserved}
@@ -334,8 +338,16 @@ const FieldDetail: React.FC = () => {
                           'border-gray-300 hover:border-emerald-500'}
                       `}
                     >
-                      <div className="text-sm font-medium">
-                        {slot.start_time} - {slot.end_time}
+                      <div className="text-sm font-medium flex flex-col items-center gap-1">
+                        <span>{slot.start_time} - {slot.end_time}</span>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold mt-1 ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 16v-4" /></svg>
+                          {slot.price} ₺
+                        </span>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold mt-1 ${slot.is_reserved ? 'bg-gray-200 text-gray-400' : 'bg-yellow-100 text-yellow-700'}`}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+                          Kapora: {slot.deposit_amount} ₺
+                        </span>
                       </div>
                       {slot.is_reserved && (
                         <div className="text-xs mt-1">Dolu</div>
