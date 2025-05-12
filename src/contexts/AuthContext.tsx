@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select('role')
           .ilike('email', normalizedEmail)
           .single();
-          
+        
         if (userRoleError) {
           console.error('Error fetching user role by email:', userRoleError);
           return { error: { message: 'Kullanıcı rolü bulunamadı.' } };
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.success('Giriş başarılı!');
         console.log('Yönlendiriliyor:', userRoleData.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard');
         navigate(userRoleData.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard');
-      } else {
+          } else {
         console.log('ID ile kullanıcı rolü bulundu:', userDataById.role);
         
         // Kullanıcı verilerini güncelle
@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserRole(userDataById.role);
         
         // Kullanıcı rolüne göre yönlendirme
-        toast.success('Giriş başarılı!');
+          toast.success('Giriş başarılı!');
         console.log('Yönlendiriliyor:', userDataById.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard');
         navigate(userDataById.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard');
       }
@@ -185,27 +185,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('Oluşturulan kullanıcı:', data.user);
       
-      // Create user record in the users table with the role
-      const { error: insertError } = await supabase.from('users').insert({
-        id: data.user.id,
+        // Create user record in the users table with the role
+        const { error: insertError } = await supabase.from('users').insert({
+          id: data.user.id,
         email: normalizedEmail,
-        role
-      });
-      
-      if (insertError) {
+          role
+        });
+        
+        if (insertError) {
         console.error('Error creating user profile:', insertError);
         // Try to delete the auth user if we failed to create the profile
         await supabase.auth.admin.deleteUser(data.user.id);
-        return { error: insertError };
-      }
+          return { error: insertError };
+        }
 
       console.log('Kullanıcı profili oluşturuldu, rol:', role);
       
       // Kullanıcı verileri önbelleğe alalım
       setUser(data.user);
       setUserRole(role);
-      
-      toast.success('Kayıt başarılı! Hoş geldiniz.');
+        
+        toast.success('Kayıt başarılı! Hoş geldiniz.');
       
       // Redirect based on role
       console.log('Kullanıcı yönlendiriliyor:', role === 'admin' ? '/admin/dashboard' : '/customer/dashboard');

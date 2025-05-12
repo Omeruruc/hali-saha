@@ -48,7 +48,7 @@ const Home: React.FC = () => {
               </div>
             ) : (
               <Button
-                onClick={() => navigate(userRole === 'admin' ? '/admin/dashboard' : '/fields')}
+                onClick={() => navigate(userRole === 'admin' ? '/admin/dashboard' : '/customer/dashboard')}
                 variant="primary"
                 size="lg"
               >
@@ -81,10 +81,18 @@ const Home: React.FC = () => {
             </div>
 
             <div className="text-center">
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto mb-4">
+              <div 
+                className="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto mb-4 cursor-pointer"
+                onClick={() => navigate('/customer/dashboard')}
+              >
                 <Soccer className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">2. Halısaha Seçin</h3>
+              <h3 
+                className="text-xl font-semibold text-gray-900 mb-2 cursor-pointer"
+                onClick={() => navigate('/customer/dashboard')}
+              >
+                2. Halısaha Seçin
+              </h3>
               <p className="text-gray-600">
                 Size uygun olan halısahayı seçin ve müsaitlik durumunu kontrol edin
               </p>
@@ -99,6 +107,17 @@ const Home: React.FC = () => {
                 Online kapora ödeyerek rezervasyonunuzu tamamlayın
               </p>
             </div>
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Button
+              onClick={() => navigate('/customer/dashboard')}
+              variant="primary"
+              size="lg"
+              className="px-8"
+            >
+              Halısaha Ara
+            </Button>
           </div>
         </div>
       </section>

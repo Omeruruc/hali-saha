@@ -52,7 +52,7 @@ const AddField: React.FC = () => {
         setLoadingCities(false);
       }
     };
-    
+
     fetchCities();
   }, [navigate, userRole]);
 
@@ -119,24 +119,24 @@ const AddField: React.FC = () => {
           <Soccer className="h-12 w-12 text-emerald-600 mx-auto mb-2" />
           <h1 className="text-3xl font-bold text-gray-800">Yeni Halısaha Ekle</h1>
           <p className="text-gray-600 mt-2">Lütfen halısaha bilgilerini giriniz</p>
-        </div>
-        
+      </div>
+      
         <Card>
-          <CardHeader>
+              <CardHeader>
             <h2 className="text-xl font-semibold text-gray-800">Halısaha Detayları</h2>
-          </CardHeader>
-          <CardContent>
+              </CardHeader>
+              <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Input
+                <Input
                 id="name"
-                label="Halısaha Adı"
+                  label="Halısaha Adı"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 error={errors.name}
-                placeholder="Örn: Yeşil Vadi Halısaha"
+                  placeholder="Örn: Yeşil Vadi Halısaha"
                 required
-              />
-              
+                />
+                
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                   Şehir
@@ -160,61 +160,61 @@ const AddField: React.FC = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.cityId}</p>
                 )}
               </div>
-              
-              <Input
-                id="location"
+                  
+                  <Input
+                    id="location"
                 label="Adres"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                error={errors.location}
+                    error={errors.location}
                 placeholder="Örn: Atatürk Mah. Spor Cad. No:42"
                 required
-              />
-              
+                  />
+                
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Açıklama
-                </label>
-                <textarea
-                  id="description"
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Açıklama
+                  </label>
+                  <textarea
+                    id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
+                    rows={4}
                   className="mt-1 block w-full rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm border-gray-300"
                   placeholder="Halısaha hakkında kısa bir açıklama..."
                 />
-              </div>
-              
-              <Input
-                id="imageUrl"
+                </div>
+                
+                <Input
+                  id="imageUrl"
                 label="Görsel URL (Opsiyonel)"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-              />
+                />
               
               <div className="flex gap-4 pt-4">
-                <Button
+                  <Button 
                   type="button"
-                  variant="outline"
+                    variant="outline" 
                   onClick={() => navigate('/admin/dashboard')}
                   fullWidth
-                >
+                  >
                   İptal
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
+                  </Button>
+                    <Button
+                      type="submit"
+                      variant="primary"
                   loading={loading}
-                  fullWidth
+                      fullWidth
                 >
                   {loading ? 'Ekleniyor...' : 'Halısaha Ekle'}
-                </Button>
-              </div>
+                    </Button>
+                  </div>
             </form>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
     </div>
   );
 };

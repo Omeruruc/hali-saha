@@ -61,7 +61,7 @@ const AdminDashboard: React.FC = () => {
           `)
           .eq('owner_id', user.id)
           .order('name');
-          
+
         if (error) throw error;
         setFields(data || []);
       } catch (error) {
@@ -77,9 +77,9 @@ const AdminDashboard: React.FC = () => {
   // Rezervasyonları yükle
   useEffect(() => {
     if (!fields.length || !user) return;
-    
+
     const fieldIds = fields.map(field => field.id);
-    
+
     const fetchReservations = async () => {
       setLoading(prevState => ({ ...prevState, reservations: true }));
       try {
@@ -91,13 +91,13 @@ const AdminDashboard: React.FC = () => {
             availabilities(
               *,
               fields(*)
-            )
+              )
             `)
             .in('availabilities.field_id', fieldIds)
           .order('reservation_time', { ascending: false });
-          
+
         if (error) throw error;
-        
+
         const formattedReservations = data?.map(item => ({
           id: item.id,
           customer_id: item.customer_id,
@@ -202,7 +202,7 @@ const AdminDashboard: React.FC = () => {
                           className="px-2 py-2 min-w-0 rounded-md text-sm font-medium flex items-center gap-1 shadow border border-gray-200 hover:border-emerald-400 transition-all truncate"
                         >
                           Müsaitlik
-                        </Button>
+                          </Button>
                       </div>
                     </div>
                   ))}
